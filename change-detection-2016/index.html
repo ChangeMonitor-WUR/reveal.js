@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8">
+
+        <title>Lima, 2016</title>
+
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+        <link rel="stylesheet" href="../css/reveal.css">
+        <link rel="stylesheet" href="../css/theme/night.css" id="theme">
+
+        <!-- For syntax highlighting -->
+        <link rel="stylesheet" href="../lib/css/zenburn.css">
+        <link href="../css/font-awesome.css" rel="stylesheet">
+
+        <!-- If the query includes 'print-pdf', include the PDF print sheet -->
+        <script>
+            if( window.location.search.match( /print-pdf/gi ) ) {
+                var link = document.createElement( 'link' );
+                link.rel = 'stylesheet';
+                link.type = 'text/css';
+                link.href = '../css/print/pdf.css';
+                document.getElementsByTagName( 'head' )[0].appendChild( link );
+            }
+        </script>
+
+        <!--[if lt IE 9]>
+        <script src="../lib/js/html5shiv.js"></script>
+        <![endif]-->
+    </head>
+
+    <body>
+
+    <div class="reveal">
+    <div class="slides">
+
+
+    <section data-background="img/landsat.jpg" data-background-size="50%"> 
+    <h2>Forest change monitoring using satellite image time series</h2>
+    <p><i>Jan Verbesselt, 2016-02-01</i></p>
+    <p>Loic Dutrieux, Ben DeVries, Johannes Reiche, Lammert Kooistra, Martin Herold, Brice Mora</p>
+    <p>Laboratory of Geo-Information Science and Remote Sensing<br>Wageningen University, The Netherlands</p>
+
+    </section>
+
+    <section>
+        <section>
+            <h2>Why do we want to keep an eye on the forests?</h2>
+        </section>
+
+        <section data-background="img/biodiversity.jpg" data-background-size="50%">
+            <p><i>"Changes in forest cover affect the delivery of important ecosystem services, including biodiversity richness, climate regulation, carbon storage, and water supplies"</i>(Foley et al. 2005; Hansen et al. 2013)</p>
+        </section>
+
+        <section data-background="img/deforestation.jpg" data-background-size="50%">
+            <h3>Forests are constantly evolving</h3>
+            <p>Between 2000 and 2012, 2.3 million km&sup2; of forest were lost and 0.8 million km&sup2; were established (Hansen et al. 2013)</p>
+        </section>
+    </section>
+
+    <section id="fragments">
+        <h2>Challenges in remote sensing forest change tracking</h2>
+        <ul>
+            <li>Detecting change in time-series is not that straightforward</li>
+            <li>Scale and intensity of disturbances vary</li>
+            <li>Anthropogenic changes can be confused with natural variablility</li>
+            <li>Cloud cover reduces data availability... <i class="fragment">sometimes a lot!!!</i></li>
+        </ul>
+    </section>
+
+    <section>
+        <section>
+            <h2>How do we detect change in time-series?</h2>
+            <h3>BFAST framework for change detection</h3>
+            <ul>
+                <li><i>Verbesselt et al. 2010a,b, 2012</i></li>
+                <li>Models vegetation annual behaviours</li>
+                <li>2 modules</li>
+                <ul>
+                    <li>Near real-time change detection (<i>bfastmonitor</i>)</li>
+                    <li>Full time-series segmentation (<i>bfast</i>)</li>
+                </ul>
+            </ul>
+        </section>
+
+        <section>
+            <h2><i>bfastmonitor</i></h2>
+            <ul>
+                <li>Near real-time change detection</li>
+                <li>Detect deviation from a stable regime</li>
+                <img src="img/bfm.gif">
+
+
+            </ul>
+                <p style="font-size:80%">Verbesselt, J., Zeileis, A., & Herold, M. (2012). Near real-time disturbance detection using satellite image time series. Remote Sensing of Environment</p>
+        </section>
+
+        <section>
+            <h2><i>bfast</i></h2>
+            <ul>
+                <li>Iteratively decomposes time-series into trend, seasonality and remainder</li>
+                <li>Segments time-series into segments and breakpoints (abrupt and gradual change)</li>
+            </ul>
+
+            <img src="img/bfast0.jpg" width="70%">
+
+
+        </section>
+
+        <section>
+            <h2><i>bfast example<br>Shifts in land use regimes</i></h2>
+            <img src="img/bfast1.jpg" width="60%">
+
+            <p style="font-size:80%">Verbesselt, J., Hyndman, R., Newnham, G., & Culvenor, D. (2010). Detecting trend and seasonal changes in satellite image time series. Remote sensing of Environment</p>
+        </section>
+
+        <section data-background="img/r.png" data-background-size="50%">
+            <h2 style="color:yellow">Available as an R package</h2>
+            <a href="http://bfast.r-forge.r-project.org/">bfast package</a>
+        </section>
+    </section>
+
+    <section>
+        <section>
+            <h2>Examples of applications</h2>
+            <p><a href="http://www.wageningenur.nl/en/Expertise-Services/Chair-groups/Environmental-Sciences/Laboratory-of-Geoinformation-Science-and-Remote-Sensing/Research/Integrated-land-monitoring/Change_detection_and_monitoring.htm">Change detection and monitoring</a> research research task</p>
+        </section>
+
+        <section data-background="img/ethiopia0.jpg" data-background-size="70%">
+        <h2 style="color:black">Monitoring small-scale forest disturbances</h2>
+        </section>
+        <section>
+            <h2>Monitoring small-scale forest disturbances</h2>
+            <ul>
+                <li>Use bfastmonitor with Landsat time-series</li>
+                <li>Combine significant change with change magnitude to detect small-scale disturbances</li>
+            </ul>
+            <br><br><br>
+            <p style="font-size:80%">DeVries, B., Verbesselt, J., Kooistra, L., & Herold, M. (2015). Robust monitoring of small-scale forest disturbances in a tropical montane forest using Landsat time series. Remote Sensing of Environment</p>
+        </section>
+        <section data-background="img/bolivia0.jpg" data-background-size="70%">
+            <h2 style="color:black">Monitoring forest cover loss using multiple data streams</h2>
+        </section>
+
+        <section>
+            <h3>Monitoring forest cover loss using multiple data streams</h3>
+
+            <ul style="font-size:80%">
+                <li>Uses MODIS NDVI as external regressor in the change detection process</li>
+                <li>Takes advantage of the scale difference between natural and anthropogenic disturbances</li>
+            </ul>
+            <img src="img/bolivia1.jpg" width="50%">
+
+            <p style="font-size:80%">Dutrieux, L. P., Verbesselt, J., Kooistra, L., & Herold, M. (2015). Monitoring forest cover loss using multiple data streams, a case study of a tropical dry forest in Bolivia. ISPRS Journal of Photogrammetry and Remote Sensing.</p>
+        </section>
+
+        <section data-background="img/fiji0.jpg" data-background-size="50%">
+            <h2 style="color:green">SAR-optical fusion for deforestation detection in the tropics</h2>
+            
+        </section>
+        <section>
+            <h2>SAR-optical fusion for deforestation detection in the tropics</h2>
+            <ul>
+                <li>Fused Landsat and PALSAR (L-band SAR) time series</li>
+                <li>Increase in spatial and temporal accuracy with high cloud cover</li>
+            </ul>
+
+            <p style="font-size:80%">Reiche, J., Verbesselt, J., Hoekman, D., & Herold, M. (2015). Fusing Landsat and SAR time series to detect deforestation in the tropics. Remote Sensing of Environment</p>
+            
+        </section>
+    </section>
+    <section>
+
+        <section>
+            <h2>Tools</h2>
+            <ul>
+                <li><a href="http://bfast.r-forge.r-project.org/">bfast R package</a></li>
+                <li><a href="https://github.com/dutri001/bfastSpatial">bfastSpatial R package</a> (training <a href="http://www.loicdutrieux.com/talks/SCERIN-2015-bfastSpatial">session</a> on Friday)</li>
+                <li><a href="https://github.com/bendv/timeSyncR">timeSyncR</a> R package</li>
+            </ul>
+
+        </section>
+
+        <section data-background="../SCERIN-2015-bfastSpatial/img/changeMap.png" data-background-size="50%" >
+            <p style="color:black"><i>A change map in 3 lines of code</i></p>
+        </section>
+
+        
+    </section>
+
+    <section>
+        <h2>Conclusion</h2>
+        <ul>
+            <li>Forest dynamics can be difficult to capture using satellites</li>
+            <li>We've developed and tested different approaches to tackle forest change monitoring in various environments</li>
+            <li>... And we keep working on it (forest regrowth, land use intensity, etc)</li>
+            <li>We've developed free (as in speech <b>and</b> in beer) tools for everyone to use</li>
+            <li>Use them and let us know what we can improve</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>Thanks!</h2>
+        <p> Update link
+        <a href="http://loicdutrieux.com/talks/SCERIN-2015-change-detection">http://loicdutrieux.com/talks/SCERIN-2015-change-detection</a>
+        </p>
+        <p>
+        <a href="http://www.wageningenur.nl/en/Expertise-Services/Chair-groups/Environmental-Sciences/Laboratory-of-Geoinformation-Science-and-Remote-Sensing/Research/Integrated-land-monitoring/Change_detection_and_monitoring.htm">Change Monitoring @ Wageningen University</a>
+        </p>
+        <p> Also Loïc Dutrieux GitHub and website: 
+        <a href="http://github.com/dutri001"><i class="fa fa-github fa-2x"></i></a>
+        </p>
+    </section>
+
+
+
+    </div>
+
+    </div>
+
+    <!-- Scripts below -->
+
+        <script src="../lib/js/head.min.js"></script>
+        <script src="../js/reveal.js"></script>
+
+        <script>
+            // Full list of configuration options available here:
+            // https://github.com/hakimel/reveal.js#configuration
+            Reveal.initialize({
+                controls: true,
+                progress: true,
+                history: true,
+                center: true,
+                theme: Reveal.getQueryHash().theme || 'night', // available themes are in /css/theme
+                transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+                // Parallax scrolling
+                // parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+                // parallaxBackgroundSize: '2100px 900px',
+                // Optional libraries used to extend on reveal.js
+                dependencies: [
+                    { src: '../lib/js/classList.js', condition: function() { return !document.body.classList; } },
+                    { src: '../plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+                    { src: '../plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+                    { src: '../plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+                    { src: '../plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+                    { src: '../plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+                ]
+            });
+        </script>
+
+    </body>
+</html>
