@@ -1,4 +1,13 @@
-# reveal.js [![Build Status](https://travis-ci.org/hakimel/reveal.js.svg?branch=master)](https://travis-ci.org/hakimel/reveal.js)
+# Change Monitoring Talks
+
+* http://changemonitor-wur.github.io/talks/bfastSpatial-2016/
+* http://changemonitor-wur.github.io/talks/change-detection-2016/
+
+
+
+# More info about how to make this presentation
+
+## reveal.js [![Build Status](https://travis-ci.org/hakimel/reveal.js.svg?branch=master)](https://travis-ci.org/hakimel/reveal.js)
 
 A framework for easily creating beautiful presentations using HTML. [Check out the live demo](http://lab.hakim.se/reveal-js/).
 
