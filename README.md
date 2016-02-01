@@ -1,7 +1,7 @@
 # Change Monitoring Talks
 
-* http://changemonitor-wur.github.io/talks/bfastSpatial-2016/
-* http://changemonitor-wur.github.io/talks/change-detection-2016/
+* [bfastSpatial](http://changemonitor-wur.github.io/talks/bfastSpatial-2016/)
+* [Changemonitor-WUR](http://changemonitor-wur.github.io/talks/change-detection-2016/)
 
 
 
