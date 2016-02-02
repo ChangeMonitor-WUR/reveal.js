@@ -111,27 +111,6 @@ devtools::install_github('dutri001/bfastSpatial')
         </section>
 
         <section>
-            <h2>Prepare the session</h2>
-            <p>Create a directory where to store input and output on your computer</p>
-            <pre>
-                <code data-trim class="r">
-# Set path of the project (these directories must exist)
-path <- '~/sandbox/changeHungary'
-inDir <- file.path(path, 'in')
-
-# Download the archive with the data (~100MB)
-download.file('http://www.geo-informatie.nl/dutri001/hungaryData.tar.gz',
-              destfile = file.path(path, 'hungaryData.tar.gz'))
-# Alternative download: https://googledrive.com/host/0B6NK5CdpGEa7ajFuQ1dBZHUwMW8
-
-# Unpack the data
-untar(file.path(path, 'hungaryData.tar.gz'), exdir = inDir)
-                </code>
-            </pre>
-
-        </section>
-
-        <section>
         <h2>About the data</h2>
         <ul>
             <li>These are Surface reflectance Landsat data downloaded via <a href="http://espa.cr.usgs.gov/">espa</a></li>
@@ -141,7 +120,6 @@ untar(file.path(path, 'hungaryData.tar.gz'), exdir = inDir)
         </ul>
         </section>
 
-
         <section>
             <h3>At the border between Romania and Hungary</h3>
             <img src="img/map.png" width="80%">
@@ -150,171 +128,13 @@ untar(file.path(path, 'hungaryData.tar.gz'), exdir = inDir)
     </section>
 
     <section>
-        <section>
-            <h2>Pre-processing</h2>
-            <p>A typical data processing/analysis project has three directories (in, step, out), which we'll need to create</p>
-            <pre>
-                <code data-trim class="r">
-library(bfastSpatial)
+        <h2> A preproducible example </h2>
+            <ul>
+                <li><a href="http://changemonitor-wur.github.io/talks/bfastSpatial-2016/bfastSpatial_Peru.html#(1)">http://changemonitor-wur.github.io/talks/bfastSpatial-2016/bfastSpatial_Peru.html</a></li>    
+            </ul>
+    </section>    
 
-# tmp dir is for storing 'invisible' temporary files
-# We can use the tmp directory of the raster package
-tmpDir <- rasterOptions()$tmpdir
 
-# StepDir is where we store intermediary outputs
-stepDir <- file.path(path, 'step')
-
-# directory for landsat data
-landsatDir <- file.path(stepDir, 'landsat')
-
-# ndviDir is a subdirectory of stepDir
-# it is where individual NDVI layers will be stored before being stacked
-ndviDir <- file.path(stepDir, 'ndvi')
-
-# Ouput directory
-outDir <- file.path(path, 'out')
-                </code>
-            </pre>
-            </section>
-
-            <section>
-                <p>These directories need to already exist before we start pre-processing the data; you can do that manually or by running the following loop</p>
-                <pre>
-                    <code data-trim class="r">
-for (i in c(stepDir, ndviDir, outDir)) {
-  dir.create(i, showWarnings = FALSE)
-}
-                    </code>
-                </pre>
-                
-        </section>
-
-        <section>
-        <h2>One last check</h2>
-        <pre>
-            <code data-trim class="r">
-# Check that we have the right data in the inDir folder
-head(getSceneinfo(list.files(inDir)))
-            </code>
-        </pre>
-        
-        <p>Output of getSceneinfo</p>
-
-        <pre>
-            <code data-trim class="nohighlight">
-LC81850272015108    OLI  185  27 2015-04-18
-LC81850272015124    OLI  185  27 2015-05-04
-LC81860272013125    OLI  186  27 2013-05-05
-LC81860272013141    OLI  186  27 2013-05-21
-LC81860272013157    OLI  186  27 2013-06-06
-LC81860272013173    OLI  186  27 2013-06-22
-            </code>
-        </pre>
-        </section>
-
-        <section>
-            <h2>Everything setup, we can start</h2>
-            <p>processLandsatBatch runs processLandsat in batch mode</p>
-            <pre>
-                <code data-trim class="r">
-# Process NDVI for all scenes of inDir (takes 3-5 minutes on my tiny Lenovo)
-processLandsatBatch(x = inDir, outdir = ndviDir, srdir = tmpDir,
-                    delete = TRUE, mask = 'fmask', vi = 'ndvi')
-                </code>
-            </pre>
-            <p>The function returns a list of TRUE, nothing to worry about, it means that everything went well</p>
-            <p>Let's check the output</p>
-            <pre>
-                <code data-trim class="r">
-head(list.files(ndviDir))
-                </code>
-            </pre>
-
-            <pre><code data-trim class="nohighlight">
-[1] "ndvi.LC81850272015108.grd" "ndvi.LC81850272015108.gri" "ndvi.LC81850272015124.grd"
-[4] "ndvi.LC81850272015124.gri" "ndvi.LC81860272013125.grd" "ndvi.LC81860272013125.gri"
-            </code></pre>
-
-        </section>
-
-        <section>
-            <h2>Then we need to create the NDVI rasterBrick</h2>
-            <pre>
-                <code data-trim class="r">
-# Make temporal ndvi stack
-ndviStack <- timeStack(x = ndviDir, pattern = glob2rx('*.grd'),
-                       filename = file.path(stepDir, 'ndvi_stack.grd'),
-                       datatype = 'INT2S')
-
-# Look at object metadata
-ndviStack
-                </code>
-            </pre>
-
-            <pre>
-                <code data-trim class="nohighlight">
-class       : RasterBrick 
-dimensions  : 176, 177, 31152, 397  (nrow, ncol, ncell, nlayers)
-resolution  : 30, 30  (x, y)
-extent      : 569805.5, 575115.5, 5275605, 5280885  (xmin, xmax, ymin, ymax)
-coord. ref. : +proj=utm +zone=34 +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0 
-data source : /home/dutri001/Desktop/HungaryData/step/ndvi_stack.grd 
-names       : LE71850272000123, LE71850272000155, LE71850272000235, ... 
-time        : 2000-02-03, 2015-06-12 (min, max)
-                </code>
-            </pre>
-        </section>
-    </section>
-
-    <section>
-        <section>
-            <h2>Run the algorithm</h2>
-
-            <p>Produce a change map between 2010 (start=) and 2013 (monend=)</p>
-            <pre>
-                <code data-trip class="r">
-# Run bfastmonitor (that part takes a long time)
-bfm <- bfmSpatial(x = ndviStack, pptype = 'irregular', start = 2010,
-                  formula = response ~ trend + harmon, order = 3,
-                  mc.cores = 1, filename = file.path(outDir, 'bfm_2010.grd'),
-                  monend = 2013)
-                </code>
-            </pre>
-            <p>The process takes about 20 min (can be monitored with the system.time() function)</p>
-            <p><tt>formula =</tt> is a particularly important parameter to tune, we'll see what influence it may have on the change results when looking at individual pixels</p>
-        </section>
-
-        <section>
-            <h2>What's the output like?</h2>
-            <pre>
-                <code data-trim class="nohighlight">
-> bfm
-
-class       : RasterBrick 
-dimensions  : 176, 177, 31152, 3  (nrow, ncol, ncell, nlayers)
-resolution  : 30, 30  (x, y)
-extent      : 569805.5, 575115.5, 5275605, 5280885  (xmin, xmax, ymin, ymax)
-coord. ref. : +proj=utm +zone=34 +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0 
-data source : /home/dutri001/Desktop/HungaryData/out/bfm_2010.grd 
-names       :   layer.1,   layer.2,   layer.3 
-min values  :  2010.427, -4599.156,        NA 
-max values  :  2012.879,  6252.375,        NA 
-                </code>
-            </pre>
-
-            <p>From the help page (?bfmSpatial)</p>
-            <p><i>By default, 3 layers are returned: (1) breakpoint: timing of breakpoints detected for each pixel; (2) magnitude: the median of the residuals within the monitoring period; (3) error: a value of 1 for pixels where an error was encountered by the algorithm (see try), and NA where the method was successfully run</i></p>
-
-        </section>
-        <section data-background='img/changeMap.png' data-background-size="50%">
-        <pre>
-            <code data-trim class="r">
-plot(ndviStack[[204]], col = grey.colors(255), legend = F)
-plot(bfm[[1]], add=TRUE)
-            </code>
-        </pre>
-        </section>
-    </section>
 
     <section>
         <section>
