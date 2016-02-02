@@ -86,6 +86,20 @@ if (!file.exists(file.path(inDir, 'ndvi_stack.grd'))) {
   ndviStack <- brick(file.path(inDir, 'ndvi_stack.grd'))
 }
 ```
+> The function 'processLandsatBatch' returns a list of TRUE, nothing to worry about, it means that everything went well
+
+Let's check output
+
+```{r}
+head(list.files(ndviDir))
+```
+
+Stack info
+
+```{r}
+ndviStack
+```
+
 
 # Derive the overal median value
 
@@ -128,6 +142,11 @@ bfmPixel(x = ndviStack, cell=17934, start = 2014,
 
 # bfastSpatial I
 
+Produce a change map between 2014 (start=) and end of the time series.
+The process takes about 20 min (can be monitored with the system.time() function)
+
+> *formula =* is a particularly important parameter to tune, we'll see what influence it may have on the change results when looking at individual pixels
+
 ```{r}
 # Run bfastmonitor (that part takes a long time)
 if (!file.exists(fn <- file.path(outDir, 'bfm_2015_harmon_1.grd'))) {
@@ -143,7 +162,24 @@ if (!file.exists(fn <- file.path(outDir, 'bfm_2015_harmon_1.grd'))) {
 }
 ```
 
-# bfastSpatial: break time!
+# bfastSpatial II
+
+What's the output like?
+
+```{r}
+bfm
+```
+
+By default, 3 layers are returned: (1) breakpoint: timing of breakpoints detected for each pixel; (2) magnitude: the median of the residuals within the monitoring period; (3) error: a value of 1 for pixels where an error was encountered by the algorithm (see try), and NA where the method was successfully run.
+
+# bfastSpatial output
+
+```{r, fig.height=4, fig.width=4}
+plot(ndviStack[[204]], col = grey.colors(255), legend = F)
+plot(bfm[[1]], add=TRUE)
+```
+
+# bfastSpatial: timing of the change
 
 ```{r, fig.height = 3.5, fig.width = 8}
 # extract change raster
@@ -186,7 +222,7 @@ plot(magn_bkp_thresh, main="magnitude < -0.05", col = cols)
 
 # bfastSpatial: check pixel time series
 
-```{r}
+```{r, fig.height = 4}
 # one pixel time
 bfmPixel(x = ndviStack, start = 2014, cell=11521,
         formula=response~harmon, order=1, history = c(2008, 7),
