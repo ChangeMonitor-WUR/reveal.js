@@ -93,6 +93,9 @@
             </ul>
             <pre>
                 <code data-trim class="r">
+# update existing R packages 
+#! the line below can potentially download lot's of R packages!
+update.packages(checkBuilt = TRUE, ask = FALSE)                
 # install devtools package
 install.packages('devtools')
                 </code>
@@ -160,6 +163,9 @@ tmpDir <- rasterOptions()$tmpdir
 
 # StepDir is where we store intermediary outputs
 stepDir <- file.path(path, 'step')
+
+# directory for landsat data
+landsatDir <- file.path(stepDir, 'landsat')
 
 # ndviDir is a subdirectory of stepDir
 # it is where individual NDVI layers will be stored before being stacked

@@ -3,8 +3,6 @@
 * http://changemonitor-wur.github.io/talks/bfastSpatial-2016/
 * http://changemonitor-wur.github.io/talks/change-detection-2016/
 
-
-
 # More info about how to make this presentation
 
 ## reveal.js [![Build Status](https://travis-ci.org/hakimel/reveal.js.svg?branch=master)](https://travis-ci.org/hakimel/reveal.js)
