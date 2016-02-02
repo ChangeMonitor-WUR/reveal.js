@@ -1,0 +1,197 @@
+---
+title: "bfastSpatial Peru"
+author: "Jan Verbesselt and Loïc Dutrieux"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: slidy_presentation
+---
+
+# Getting started!
+
+After bfastSpatial is installed:
+
+  * define path for reading and saving files
+  * set directories
+
+```{r, eval=FALSE}
+path <- '~/locationofyourscript'
+```
+
+```{r, echo=FALSE, message=FALSE,results='hide'}
+library(bfastSpatial)
+path <- "~/Git/ChangeMonitor-WUR/Talks/bfastSpatial-2016"
+```
+
+
+```{r, message=TRUE, echo=TRUE, error=FALSE, results='hide'}
+library(bfastSpatial)
+tmpDir <- rasterOptions()$tmpdir
+# set the path the to the location of your script
+inDir <- file.path(path, 'data')
+# StepDir is where we store intermediary outputs
+stepDir <- file.path(inDir, 'datastep')
+# directory for landsat data
+landsatDir <- file.path(stepDir, 'landsat')
+# it is where individual NDVI layers will be stored before being stacked
+# ndviDir is a subdirectory of stepDir
+ndviDir <- file.path(stepDir, 'ndvi')
+# OutDir is where the output will be stored
+outDir <- file.path(inDir, 'out')
+```
+
+# Check if all directories exist
+
+```{r, echo=TRUE}
+## check if dir exist
+for (i in c(stepDir, ndviDir, outDir, landsatDir)) {
+  print(dir.exists(i))
+}
+```
+
+Download the archive with the data (~100MB)!
+
+```{r}
+if (!file.exists(file.path(inDir, 'hungaryData.tar.gz'))) {
+  download.file('http://www.geo-informatie.nl/dutri001/hungaryData.tar.gz',
+              destfile = file.path(inDir, 'hungaryData.tar.gz'))
+  # Alternative download: https://googledrive.com/host/0B6NK5CdpGEa7ajFuQ1dBZHUwMW8
+  # Unpack the data
+  untar(file.path(inDir, 'hungaryData.tar.gz'), exdir = landsatDir)
+}
+```
+
+# Preprocessing the data: I
+
+Check files:
+
+```{r}
+# Check that we have the right data in the inDir folder
+head(getSceneinfo(list.files(landsatDir)))
+```
+
+>  Note: the lines below take some time!
+
+# Preprocessing the data: II
+
+```{r}
+if (!file.exists(file.path(inDir, 'ndvi_stack.grd'))) {
+  # unzip individual file, use the cloudmask, create ndvi (if this does not exists)
+  processLandsatBatch(x = landsatDir, outdir = ndviDir, srdir = tmpDir,
+                    delete = TRUE, mask = 'fmask', vi = 'ndvi')
+
+  # Make temporal ndvi stack
+  ndviStack <- timeStack(x = ndviDir, pattern = glob2rx('*.grd'),
+                       filename = file.path(inDir, 'ndvi_stack.grd'),
+                       datatype = 'INT2S')
+} else {
+  ndviStack <- brick(file.path(inDir, 'ndvi_stack.grd'))
+}
+```
+
+# Derive the overal median value
+
+```{r, fig.height = 4, fig.width = 4}
+if (!file.exists(fn <- file.path(outDir, 'medianVI.grd')))
+  # median values for all layers
+  medVI <- summaryBrick(ndviStack, fun=median, na.rm=TRUE, 
+              filename = fn) else {
+  medVI <- brick(fn)
+}
+plot(medVI/10000)
+```
+
+# BfmPixel I
+
+Run BfastMonitor for one pixel time series, by clicking on the map:
+
+```{r, fig.height = 4, fig.width = 4}
+# Plot a cloud free recent NDVI layer
+names(ndviStack)[394]
+plot(ndviStack, 394)
+```
+
+# BfmPixel II
+
+```{r, eval=FALSE}
+# Call bfmPixel in interactive mode
+# to test settings before running it on the brick
+bfmPixel(x = ndviStack, start = 2014,
+        formula=response~harmon, order=1, history = c(2008, 7),
+         interactive = TRUE,
+         plot = TRUE)
+```
+
+```{r, echo = FALSE, fig.height = 4}
+bfmPixel(x = ndviStack, cell=17934, start = 2014,
+        formula=response~harmon, order=1, history = c(2008, 7),
+         plot = TRUE)
+```
+
+# bfastSpatial I
+
+```{r}
+# Run bfastmonitor (that part takes a long time)
+if (!file.exists(fn <- file.path(outDir, 'bfm_2015_harmon_1.grd'))) {
+  # make sure the filename is correct and the folder exists
+  bfm <- bfmSpatial(x = ndviStack, pptype = 'irregular',
+                  start = 2014, history = c(2008, 7),
+                  formula = response ~ harmon,
+                  order = 1, mc.cores = 3,
+                  filename = file.path(outDir, 'bfm_2015_harmon_1.grd')
+                  )
+} else {
+  bfm <- brick(fn)
+}
+```
+
+# bfastSpatial: break time!
+
+```{r, fig.height = 3.5, fig.width = 8}
+# extract change raster
+change <- raster(bfm, 1)
+# look at the timing of change
+months <- changeMonth(change)
+# set up labels and colourmap for months
+monthlabs <- c("jan", "feb", "mar", "apr", "may", "jun",
+               "jul", "aug", "sep", "oct", "nov", "dec")
+cols <- rainbow(12)
+plot(months, col=cols, breaks=c(1:12), legend=FALSE)
+legend("bottomright", legend=monthlabs, cex=0.5, fill=cols, ncol=2)
+```
+
+# bfastSpatial: Magnitude of the break
+
+```{r, fig.height = 4, fig.width = 8}
+# extract magnitude of the raster and scale values between 0-1.
+magn <- raster(bfm, 2) / 10000
+# make a version showing only breakpoing pixels
+magn_bkp <- magn
+magn_bkp[is.na(change)] <- NA
+opar <- par(mfrow=c(1, 2))
+plot(magn_bkp, main="Magnitude of a breakpoint")
+plot(magn, main="Magnitude: all pixels")
+par(opar)
+```
+
+# bfastSpatial: Set a treshold
+
+```{r, fig.height = 4, fig.width = 4, message=FALSE}
+# extract and rescale magnitude and apply a threshold
+magn_bkp_thresh <- magn_bkp
+magn_bkp_thresh[magn_bkp > -0.05] <- NA
+# compare
+library(colorspace) ## package for nice colors
+cols <- heat_hcl(12)
+plot(magn_bkp_thresh, main="magnitude < -0.05", col = cols)
+```
+
+# bfastSpatial: check pixel time series
+
+```{r}
+# one pixel time
+bfmPixel(x = ndviStack, start = 2014, cell=11521,
+        formula=response~harmon, order=1, history = c(2008, 7),
+         plot = TRUE)
+```
+
+
+
